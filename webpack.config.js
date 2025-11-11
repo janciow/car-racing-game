@@ -5,10 +5,13 @@ module.exports = {
   entry: ['./src/js/index.js'],
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'js/bundle.js'
+    filename: 'js/bundle.js',
+    clean: true
   },
   devServer: {
-    contentBase: './dist'
+    static: './dist',
+    port: 8080,
+    open: true
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -19,8 +22,8 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(png|svg|jpg|gif)$/,
-        use: ['file-loader']
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: 'asset/resource'
       }
     ]
   }
