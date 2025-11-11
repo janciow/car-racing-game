@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "webpack --mode development",
-    "start": "webpack-dev-server --mode development --open"
+    "dev": "NODE_OPTIONS=\"--openssl-legacy-provider\" webpack --mode development",
+    "build": "NODE_OPTIONS=\"--openssl-legacy-provider\" webpack --mode development",
+    "serve": "cd dist && python3 -m http.server 8080",
+    "start": "npm run build && npm run serve"
   },
   "author": "",
   "license": "ISC",
