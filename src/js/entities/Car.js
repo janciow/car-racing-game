@@ -56,9 +56,22 @@ export class CarInput {
     }
     
     if (this.reversePressed) {
-      const forceX = -Math.cos(transform.rotation) * config.REVERSE_POWER;
-      const forceY = -Math.sin(transform.rotation) * config.REVERSE_POWER;
-      physics.applyForce(forceX, forceY);
+      // Proper braking/reverse logic
+      if (physics.speed > 2) {
+        // If moving forward significantly, apply braking force
+        physics.speed *= config.ACTIVE_BRAKE_POWER; // Strong braking
+      } else if (physics.speed > -1) {
+        // If nearly stopped or moving slowly, allow reverse
+        const forceX = -Math.cos(transform.rotation) * config.REVERSE_POWER;
+        const forceY = -Math.sin(transform.rotation) * config.REVERSE_POWER;
+        physics.applyForce(forceX, forceY);
+      }
+    }
+    
+    // Apply extra braking when no input is pressed
+    if (!this.gasPressed && !this.reversePressed) {
+      // Apply stronger friction when coasting
+      physics.speed *= config.BRAKE_POWER; // Use config value for coasting brake
     }
 
     // Apply turning - allow turning even when stationary
@@ -84,6 +97,12 @@ export class CarPhysics extends Physics {
     const config = GameConfig.CAR.PHYSICS;
     this.maxSpeed = config.MAX_SPEED;
     this.friction = config.GROUND_SPEED_DECAY;
+    
+    // Add startup grace period to avoid collision issues at start
+    this.startupTime = 0;
+    this.startupGracePeriod = 2000; // 2 seconds grace period
+    this.hasMovedFromStart = false;
+    this.startPosition = null;
   }
 
   /**
@@ -94,17 +113,41 @@ export class CarPhysics extends Physics {
     // Store previous position for collision response
     if (this.entity && this.entity.hasComponent('Transform')) {
       const transform = this.entity.getComponent('Transform');
+      
+      // Initialize start position on first update
+      if (!this.startPosition) {
+        this.startPosition = {
+          x: transform.position.x,
+          y: transform.position.y
+        };
+      }
+      
+      // Check if car has moved significantly from start
+      const distanceFromStart = Math.sqrt(
+        Math.pow(transform.position.x - this.startPosition.x, 2) + 
+        Math.pow(transform.position.y - this.startPosition.y, 2)
+      );
+      
+      if (distanceFromStart > 20) { // 20 pixels away from start
+        this.hasMovedFromStart = true;
+      }
+      
       this.previousPosition = {
         x: transform.position.x,
         y: transform.position.y
       };
     }
 
+    // Update startup timer
+    this.startupTime += deltaTime * 1000; // Convert to milliseconds
+
     // Update physics normally
     super.update(deltaTime);
 
-    // Check for track collisions
-    this.checkTrackCollision();
+    // Only check collisions after grace period AND after moving from start
+    if (this.startupTime > this.startupGracePeriod && this.hasMovedFromStart) {
+      this.checkTrackCollision();
+    }
   }
 
   /**
@@ -118,13 +161,15 @@ export class CarPhysics extends Physics {
 
     // Check if current position is an obstacle
     if (isObstacle(gridPos.col, gridPos.row)) {
-      // Collision detected - revert to previous position and bounce
+      // Collision detected - revert to previous position and reduce speed
       if (this.previousPosition) {
         transform.setPosition(this.previousPosition.x, this.previousPosition.y);
       }
       
-      // Apply bounce effect
+      // Apply bounce effect - but not too harsh
       this.speed *= GameConfig.CAR.PHYSICS.COLLISION_BOUNCE;
+      
+      console.log('Collision detected at grid position:', gridPos, 'speed reduced to:', this.speed);
     }
   }
 }

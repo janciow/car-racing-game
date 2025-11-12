@@ -48,13 +48,15 @@ export const GameConfig = {
   // Car physics parameters
   CAR: {
     PHYSICS: {
-      GROUND_SPEED_DECAY: 0.99,  // Very light friction
+      GROUND_SPEED_DECAY: 0.95,  // Reduced from 0.99 to 0.95 for better braking
       DRIVE_POWER: 100.0,  // Much higher drive power
       REVERSE_POWER: 50.0,  // Higher reverse power
+      BRAKE_POWER: 0.92,   // Additional braking when coasting
+      ACTIVE_BRAKE_POWER: 0.85, // Strong braking when pressing S while moving forward
       TURN_RATE: 0.06,
       MIN_SPEED_TO_TURN: 0,
       MAX_SPEED: 200.0,  // High max speed
-      COLLISION_BOUNCE: -0.5
+      COLLISION_BOUNCE: -0.1  // Reduced from -0.5 to be less punishing
     },
     
     // Car dimensions
@@ -130,8 +132,8 @@ export const GameConfig = {
 // Track layout data
 export const TRACK_GRID = [
   1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1, 1,1,1,1,1,
-  1,0,3,0,0, 0,0,0,0,0, 0,0,0,0,1, 4,2,2,0,1,
   1,0,3,0,0, 0,0,0,0,0, 0,0,0,0,1, 4,0,0,0,1,
+  1,0,3,0,0, 0,0,0,0,0, 0,0,0,0,1, 4,2,2,0,1,
   1,4,1,1,1, 1,1,1,1,1, 1,0,0,0,1, 1,0,0,0,1,
   1,1,1,0,0, 1,4,4,0,1, 0,0,0,0,0, 1,0,0,0,1,
 
