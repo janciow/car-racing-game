@@ -53,14 +53,14 @@ export const GameConfig = {
       REVERSE_POWER: 50.0,  // Higher reverse power
       TURN_RATE: 0.06,
       MIN_SPEED_TO_TURN: 0,
-      MAX_SPEED: 300.0,  // High max speed
+      MAX_SPEED: 200.0,  // High max speed
       COLLISION_BOUNCE: -0.5
     },
     
     // Car dimensions
     SIZE: {
       WIDTH: 32,
-      HEIGHT: 32
+      HEIGHT: 16
     },
 
     // Starting positions
